@@ -10,9 +10,9 @@ resource "google_storage_bucket" "bucket" {
 }
 
 resource "google_storage_bucket_object" "object" {
-  name   = "helloGet/function-source.zip"
+  name   = "function/function-source.zip"
   bucket = google_storage_bucket.bucket.name
-  source   = "../helloGet/function-source.zip"
+  source   = "../function/function-source.zip"
 }
 
 resource "google_cloudfunctions2_function" "function" {
@@ -21,8 +21,8 @@ resource "google_cloudfunctions2_function" "function" {
   description = "a new function"
 
   build_config {
-    runtime     = "nodejs16"
-    entry_point = "helloHttp" # Set the entry point
+    runtime     = "go119"
+    entry_point = "HelloGet"
     source {
       storage_source {
         bucket = google_storage_bucket.bucket.name

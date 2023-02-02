@@ -4,18 +4,20 @@
 
 ### build
 
-dir: ./helloGet
+dir: ./function
 
 ```
-npm i
+go build ./...
 ```
 
 ### package
 
-dir: ./helloGet
+Package needs to `go mod vendor` any private modules.
+
+dir: ./function
 
 ```
-zip function-source.zip ./**/*
+zip -r function-source.zip *
 ```
 
 ### deploy-dev
