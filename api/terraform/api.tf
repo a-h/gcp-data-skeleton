@@ -22,7 +22,7 @@ resource "google_cloudfunctions2_function" "function" {
 
   build_config {
     runtime     = "go119"
-    entry_point = "HelloGet"
+    entry_point = "http"
     source {
       storage_source {
         bucket = google_storage_bucket.bucket.name
@@ -32,10 +32,24 @@ resource "google_cloudfunctions2_function" "function" {
   }
 
   service_config {
-    max_instance_count = 1
     available_memory   = "256M"
     timeout_seconds    = 60
+    environment_variables = {
+        PROJECT_ID = var.project_id
+        TOPIC_ID = google_pubsub_topic.samples.name
+    }
   }
+  
+  lifecycle {
+    replace_triggered_by  = [
+      google_storage_bucket_object.object
+    ]
+  }
+}
+
+resource "google_pubsub_topic" "samples" {
+  name = "samples"
+  message_retention_duration = "86600s"
 }
 
 output "function_uri" {
