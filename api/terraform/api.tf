@@ -6,13 +6,13 @@ resource "google_storage_bucket" "bucket" {
   name                        = "gcp-data-skeleton-${random_id.bucket_suffix.hex}"
   location                    = var.region
   uniform_bucket_level_access = true
-  public_access_prevention = "enforced"
+  public_access_prevention    = "enforced"
 }
 
 resource "google_storage_bucket_object" "object" {
   name   = "function/function-source.zip"
   bucket = google_storage_bucket.bucket.name
-  source   = "../function/function-source.zip"
+  source = "../function/function-source.zip"
 }
 
 resource "google_cloudfunctions2_function" "function" {
@@ -32,23 +32,23 @@ resource "google_cloudfunctions2_function" "function" {
   }
 
   service_config {
-    available_memory   = "256M"
-    timeout_seconds    = 60
+    available_memory = "256M"
+    timeout_seconds  = 60
     environment_variables = {
-        PROJECT_ID = var.project_id
-        TOPIC_ID = google_pubsub_topic.samples.name
+      PROJECT_ID = var.project_id
+      TOPIC_ID   = google_pubsub_topic.samples.name
     }
   }
-  
+
   lifecycle {
-    replace_triggered_by  = [
+    replace_triggered_by = [
       google_storage_bucket_object.object
     ]
   }
 }
 
 resource "google_pubsub_topic" "samples" {
-  name = "samples"
+  name                       = "samples"
   message_retention_duration = "86600s"
 }
 

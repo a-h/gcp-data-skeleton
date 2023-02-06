@@ -2,6 +2,7 @@ package samples
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
 	"github.com/a-h/gcp-data-skeleton/api/function/models"
@@ -21,18 +22,29 @@ type Handler struct {
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.Body == nil {
+		respond.WithError(w, "missing body", http.StatusBadRequest)
+		return
+	}
+	var sample models.Sample
+	err := json.NewDecoder(r.Body).Decode(&sample)
+	if err != nil {
+		respond.WithError(w, "could not decode request body", http.StatusBadRequest)
+		return
+	}
+	if sample.Name == "" {
+		respond.WithError(w, "invalid sample name", http.StatusBadRequest)
+		return
+	}
+
 	h.Log.Info("publishing message")
-	serverID, err := h.Client.Publish(r.Context(), pubsub.Message[models.Sample]{
-		Data: models.Sample{
-			Name:  "sample",
-			Value: 666.0,
-		},
-	})
+	serverID, err := h.Client.Publish(r.Context(), pubsub.Message[models.Sample]{Data: sample})
 	if err != nil {
 		h.Log.Error("failed to publish sample", zap.Error(err))
 		respond.WithError(w, "failed to publish sample", http.StatusInternalServerError)
 		return
 	}
+
 	h.Log.Info("published sample", zap.String("serverId", serverID))
 	respond.WithJSON(w, models.SamplePostResponse{OK: true}, http.StatusOK)
 	return
