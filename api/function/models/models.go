@@ -5,7 +5,8 @@ type SamplePostRequest struct {
 }
 
 type SamplePostResponse struct {
-	OK bool `json:"ok"`
+	OK       bool   `json:"ok"`
+	ServerID string `json:"serverId"`
 }
 
 type Sample struct {

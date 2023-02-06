@@ -46,6 +46,6 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.Log.Info("published sample", zap.String("serverId", serverID))
-	respond.WithJSON(w, models.SamplePostResponse{OK: true}, http.StatusOK)
+	respond.WithJSON(w, models.SamplePostResponse{OK: true, ServerID: serverID}, http.StatusOK)
 	return
 }
