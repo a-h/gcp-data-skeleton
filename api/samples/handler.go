@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/a-h/gcp-data-skeleton/api/function/db"
-	"github.com/a-h/gcp-data-skeleton/api/function/models"
-	"github.com/a-h/gcp-data-skeleton/api/function/pubsub"
+	"github.com/a-h/gcp-data-skeleton/api/db"
+	"github.com/a-h/gcp-data-skeleton/api/pubsub"
+	"github.com/a-h/gcp-data-skeleton/models"
 	"github.com/a-h/respond"
 	"github.com/segmentio/ksuid"
 	"go.uber.org/zap"

@@ -4,8 +4,6 @@
 
 ### build
 
-dir: ./function
-
 ```
 go build ./...
 ```
@@ -14,10 +12,8 @@ go build ./...
 
 Package needs to `go mod vendor` any private modules.
 
-dir: ./function
-
 ```
-zip -r function-source.zip *
+zip -r source.zip * -x "terraform/*" -x ".git"
 ```
 
 ### deploy-dev

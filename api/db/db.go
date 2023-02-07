@@ -5,7 +5,7 @@ import (
 
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
-	"github.com/a-h/gcp-data-skeleton/api/function/models"
+	"github.com/a-h/gcp-data-skeleton/models"
 	"google.golang.org/api/iterator"
 )
 
