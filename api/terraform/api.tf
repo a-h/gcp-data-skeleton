@@ -32,7 +32,8 @@ resource "google_cloudfunctions2_function" "function" {
   }
 
   service_config {
-    min_instance_count = 1
+    min_instance_count = 0
+    max_instance_count = 100
     available_memory   = "256M"
     timeout_seconds    = 60
     environment_variables = {
@@ -49,11 +50,11 @@ resource "google_cloudfunctions2_function" "function" {
 }
 
 # Make the Cloud Function publicly accessible.
-resource "google_cloud_run_service_iam_binding" "public_access" {
+resource "google_cloud_run_service_iam_member" "public_access" {
   location = google_cloudfunctions2_function.function.location
   service  = google_cloudfunctions2_function.function.name
   role     = "roles/run.invoker"
-  members  = ["allUsers"]
+  member   = "allUsers"
 }
 
 resource "google_pubsub_topic" "samples" {
