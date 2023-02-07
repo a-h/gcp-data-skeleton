@@ -37,6 +37,12 @@ resource "google_cloud_run_service_iam_member" "public_access" {
   service  = google_cloudfunctions2_function.http.name
   role     = "roles/run.invoker"
   member   = "allUsers"
+
+  lifecycle {
+    replace_triggered_by = [
+      google_cloudfunctions2_function.http
+    ]
+  }
 }
 
 output "function_uri" {

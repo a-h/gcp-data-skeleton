@@ -38,6 +38,31 @@ type Handler struct {
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		h.Get(w, r)
+	case http.MethodPost:
+		h.Post(w, r)
+	default:
+		respond.WithError(w, fmt.Sprintf("unsupported method %q", r.Method), http.StatusMethodNotAllowed)
+	}
+}
+
+func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
+	h.Log.Info("querying database")
+	name := r.URL.Query().Get("name")
+	samples, err := h.DB.Query(r.Context(), name)
+	if err != nil {
+		h.Log.Error("failed to query database", zap.Error(err))
+		respond.WithError(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	respond.WithJSON(w, models.SamplesGetResponse{
+		Samples: samples,
+	}, http.StatusOK)
+}
+
+func (h *Handler) Post(w http.ResponseWriter, r *http.Request) {
 	if r.Body == nil {
 		respond.WithError(w, "missing body", http.StatusBadRequest)
 		return

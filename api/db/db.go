@@ -47,7 +47,7 @@ func (s *Samples) Get(ctx context.Context, id string) (sample models.Sample, err
 
 func (s *Samples) Query(ctx context.Context, name string) (samples []models.Sample, err error) {
 	q := s.Collection.
-		Where("name", "==", name).
+		Where("Name", "==", name).
 		Documents(ctx)
 
 	for {

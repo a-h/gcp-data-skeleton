@@ -9,6 +9,10 @@ type SamplePostResponse struct {
 	ServerID string `json:"serverId"`
 }
 
+type SamplesGetResponse struct {
+	Samples []Sample `json:"samples"`
+}
+
 type Sample struct {
 	Name  string  `json:"name"`
 	Value float64 `json:"value"`
