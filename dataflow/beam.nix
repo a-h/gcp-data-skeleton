@@ -24,5 +24,7 @@
     google-cloud-storage
     apache-beam
     grpcio
+    # Apache Beam tries to use pip. I don't know why.
+    pip
   ]);
 }

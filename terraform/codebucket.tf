@@ -15,3 +15,7 @@ resource "google_storage_bucket_object" "code" {
   source = "../source.zip"
 }
 
+output "bucket" {
+  value = google_storage_bucket.bucket.name
+}
+

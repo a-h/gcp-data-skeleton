@@ -1,6 +1,8 @@
 import argparse
 import logging
+import os
 import re
+import json
 
 import apache_beam as beam
 from apache_beam.io import ReadFromText
@@ -19,10 +21,6 @@ def main(argv=None, save_main_session=True):
       '--output',
       dest='output',
       default='op.txt',
-      # CHANGE 1/6: (OPTIONAL) The Google Cloud Storage path is required
-      # for outputting the results.
-      #TODO: Update this bucket to be environment variable driven.
-      #default='gs://YOUR_OUTPUT_BUCKET/AND_OUTPUT_PREFIX',
       help='Output file to write results to.')
 
   # If you use DataflowRunner, below options can be passed:
