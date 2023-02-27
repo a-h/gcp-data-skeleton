@@ -99,6 +99,30 @@
 
 ---
 
+### Emoji check:
+
+How well do you think you understand the core services components of cloud platforms?
+
+1. 😢 Haven't a clue, please help!<br/>
+2. 🙁 I'm starting to get it but need to go over some of it please<br/>
+3. 😐 Ok. With a bit of help and practice, yes<br/>
+4. 🙂 Yes, with team collaboration could try it<br/>
+5. 😀 Yes, enough to start working on it collaboratively<br/>
+
+<aside class="notes">
+    The phrasing is such that all answers invite collaborative effort, none require solo knowledge.
+
+    The 1-5 are looking at (a) understanding of content and (b) readiness to practice the thing being covered, so:
+
+    1. 😢 Haven't a clue what's being discussed, so I certainly can't start practising it (play MC Hammer song)
+    2. 🙁 I'm starting to get it but need more clarity before I'm ready to begin practising it with others
+    3. 😐 I understand enough to begin practising it with others in a really basic way
+    4. 🙂 I understand a majority of what's being discussed, and I feel ready to practice this with others and begin to deepen the practice
+    5. 😀 I understand all (or at the majority) of what's being discussed, and I feel ready to practice this in depth with others and explore more advanced areas of the content
+</aside>
+
+---
+
 ### Challenge
 
 > As an utilities company, we want to collect regular meter readings from our customer's smart meters and industrial equipment.
@@ -317,17 +341,75 @@ provider "google" {
 
 ---
 
-# Cloud Firestore Intro
+### Cloud Firestore: Discussion
+
+* Database types
+  * Key/value
+  * Document
+  * Graph
+  * Relational
+* Reliability
+  * Mirroring
+  * Clustering
+  * CAP theorem
+* Security
+  * Encryption in transit
+  * Encryption at rest
 
 ---
 
-# Upsert and Query Firestore From Cloud Functions
+### Cloud Firestore: API
 
-* Duration - 2 sessions
+```go
+func main() {
+  conf := &firebase.Config{ProjectID: "My GCP project"}
+
+  app, err := firebase.NewApp(ctx, conf)
+  if err != nil { return }
+
+  client, err := app.Firestore(ctx)
+  if err != nil { return }
+
+  collection := client.Collection("samples")
+
+  // Upsert.
+  _, err = collection.Doc(id).Set(ctx, Sample{Name:"test",Value:123.45})
+  if err != nil { return }
+
+  // Get
+  doc, err := collection.Doc(id).Get(ctx)
+  if err != nil || !doc.Exists() { return }
+}
+```
 
 ---
 
-# Single table design introduction
+### Cloud Firestore: Console
+
+* Insert, and delete data
+* Execute queries
+
+---
+
+### Upsert and Query Firestore From Cloud Functions
+
+* Duration - 3 sessions
+* Update your REST API to store the sample data it receives
+* Add an endpoint to query the data back, by name
+* Bonus - use the Cloud Firestore emulator
+
+
+---
+
+### Put these in the right order
+
+* Update your code to take environment variables to use for the Google Project ID.
+* Initialize a Firebase SDK app using the Project ID.
+* Use the Firebase SDK to create a Firestore Client.
+* Get the collection from the Firebase Client.
+* Create a `google_app_engine_application` in Terraform to initialize Firestore in the project.
+* Use the Firebase collection to `Set` and `Get` documents from the datbase. 
+* Update your Cloud Function Terraform file to pass environment variables to the Cloud Function containing the Project ID.
 
 ---
 
@@ -335,23 +417,79 @@ provider "google" {
 
 ---
 
-# PubSub Intro
+### Group Discussion: Messaging
+
+* Why would you want a message queue in an application?
+* Where have you used one and it worked well?
+* Where did it make things more complex?
 
 ---
 
-# Send to PubSub from Cloud Functions
+### Group Discussion: Messaging topologies
+
+Where is each one useful?
+
+| Producers | Consumers | Receivers |
+|-----------|-----------|-----------|
+| One       | One       | One       |
+| One       | Many      | One       |
+| One       | Many      | All       |
+| Many      | One       | One       |
+| Many      | Many      | One       |
+| Many      | Many      | All       |
 
 ---
 
-# Subscribe Cloud Functions to PubSub
+### Workshop: Send to PubSub from Cloud Functions
+
+Put these in the right order:
+
+* Add an environment variable in your Cloud Function containing the `TOPIC_ID`. 
+* Create an instance of the GCP PubSub client in your code.
+* Create a `google_pubsub_topic` in Terraform.
+* Send data to PubSub using the GCP PubSub client.
+* Add the GCP SDK for PubSub to your code.
 
 ---
 
-# Subscribe to PubSub from Cloud Firestore
+### Subscribe Cloud Functions to PubSub
+
+Don't make an infinite loop!
+
+```hcl
+event_trigger {
+  trigger_region = var.zone
+  event_type     = "google.cloud.pubsub.topic.v1.messagePublished"
+  pubsub_topic   = google_pubsub_topic.samples.id
+  retry_policy   = "RETRY_POLICY_DO_NOT_RETRY" # "RETRY_POLICY_RETRY"
+}
+```
+
+Research the right format for the message handler for your chosen language.
+
+```go
+functions.CloudEvent("on-sample-published", 
+  func(ctx context.Context, event cloudevents.Event) error {
+    var sample models.Sample
+    err := event.DataAs(&sample)
+    if err != nil {
+      h.Log.Error("failed to unmarshal sample", zap.Error(err))
+      return err
+    }
+    h.Log.Info("processed event", zap.Any("sample", sample))
+})
+```
 
 ---
 
-# Social!
+### Discussion: Subscribe Cloud Firestore changes
+
+* Why might this be useful?
+* Where have we done something like this in projects?
+
+---
+
+### Social
 
 ---
 
@@ -359,17 +497,22 @@ provider "google" {
 
 ---
 
-# Project tidy up time!
+### Project tidy up
 
 * Duration - 2 sessions
+* Get your project ready for a demo
+  * What was just how you expected?
+  * What didn't you expect?
+  * How have you structured your project?
+  * What structure have you seen so far that you liked the most?
 
 ---
 
-# Demo time
+### Demo time!
 
 ---
 
-# Project overview
+### Project overview
 
 * Example project overview from someone that's implemented a project on GCP
 
@@ -379,23 +522,39 @@ provider "google" {
 
 ---
 
-# Intro to BigQuery
+### Intro to BigQuery
+
+* Fixed cluster size databases, SQL Server etc.
+* Data warehouse alternatives, Snowflake, Athena
+* Payment model
+* Type system
+  * Typical SQL definitions
+  * JSON type
 
 ---
 
-# Import data to BigQuery from PubSub
+### Import data to BigQuery from PubSub
+
+* Create subscription to PubSub and put the data into BigQuery.
+* Use the `google_pubsub_scription` Terraform resource.
+* Send data to BiqQuery by posting a sample to your REST API.
 
 ---
 
-# Query JSON data in BigQuery - GroupBy, Sum
+### Query JSON data in BigQuery - GroupBy, Sum
+
+* Query the data from within BigQuery.
+* Sum all the samples you've got.
+* Sum all the samples with a value for each of the last 7 days.
+* Find the day with the biggest increase between the lower and upper bounds for a single name.
 
 ---
 
-# Day 7
+### Day 7
 
 ---
 
-# Intro to Github Actions
+### Intro to Github Actions
 
 * What is CI/CD?
 * Why do we use it?
@@ -406,13 +565,14 @@ provider "google" {
 
 ---
 
-# Workshop: Setup CI/CD Pipeline
+### Workshop: Setup CI/CD Pipeline
 
 * Duration - 2 sessions
+* Automate the creation of your infrastructure from the git repo.
 
 ---
 
-# Q&A panel existing experts
+### Q&A panel existing experts
 
 ---
 
@@ -420,7 +580,7 @@ provider "google" {
 
 ---
 
-# Intro to GCP DataFlow
+### Group Discussion: Streaming data
 
 * Streaming data
 * Event sourcing
@@ -429,14 +589,73 @@ provider "google" {
 
 ---
 
-# Workshop: Dataflow Hello World
+### Stateful functions
 
-* WordCount - Hello World
-* Setup Python environment
+* Apache Beam framework
+   * Supported runtimes.
+   * Java best support, with Python 2nd.
 
 ---
 
-# Workshop: Dataflow streaming
+### Beam job anatomy
+
+```python
+def main(argv=None, save_main_session=True):
+  parser = argparse.ArgumentParser()
+  parser.add_argument(
+      '--input',
+      dest='input',
+      default='gs://dataflow-samples/shakespeare/kinglear.txt',
+      help='Input file to process.')
+  parser.add_argument(
+      '--output',
+      dest='output',
+      default='op.txt',
+      help='Output file to write results to.')
+
+  known_args, pipeline_args = parser.parse_known_args(argv)
+
+  pipeline_options = PipelineOptions(pipeline_args)
+  pipeline_options.view_as(SetupOptions).save_main_session = save_main_session
+  with beam.Pipeline(options=pipeline_options) as p:
+    lines = p | ReadFromText(known_args.input)
+
+    counts = (
+        lines
+        | 'Split' >> (
+            beam.FlatMap(
+                lambda x: re.findall(r'[A-Za-z\']+', x)).with_output_types(str))
+        | 'PairWithOne' >> beam.Map(lambda x: (x, 1))
+        | 'GroupAndSum' >> beam.CombinePerKey(sum))
+
+    # Format the counts into a PCollection of strings.
+    def format_result(word_count):
+      (word, count) = word_count
+      return '%s: %s' % (word, count)
+
+    output = counts | 'Format' >> beam.Map(format_result)
+
+    output | WriteToText(known_args.output)
+
+
+if __name__ == '__main__':
+  logging.getLogger().setLevel(logging.INFO)
+  main()
+```
+
+---
+
+### Workshop: Dataflow Hello World
+
+* Setup Python environment
+  * You will need Python 3.9
+  * If you use [Nix](https://github.com/a-h/gcp-data-skeleton/blob/main/dataflow/beam.nix)
+* WordCount - Hello World
+  * [Beam Quickstart](https://console.cloud.google.com/?walkthrough_id=dataflow--quickstart-beam--quickstart-beam-python&_ga=2.180497767.1987587226.1677161360-1453615420.1674057740&_gac=1.26380879.1675158091.CjwKCAiAleOeBhBdEiwAfgmXf8uznvxChlSc9pvTO53PG1NJMKpk9tireefPlTQ4qxj7wvBI3AaXiRoCLBQQAvD_BwE)
+
+---
+
+### Workshop: Dataflow streaming
 
 * Maintain average over last 24 samples
 
@@ -446,34 +665,34 @@ provider "google" {
 
 ---
 
-# Social
+### Social
 
 ---
 
-# Project time
+### Project time
 
 * Duration - 2 sessions
 
 ---
 
-# Feedback / 1-1s
+### Feedback / 1-1s
 
 ---
 
-# Day 10
+### Day 10
 
 ---
 
-# Project time
+### Project time
 
 * Duration - 2 sessions
 
 ---
 
-# Final demos
+### Final demos
 
 ---
 
-# Final retro
+### Final retro
 
 ---
